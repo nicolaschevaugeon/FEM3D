@@ -23,20 +23,30 @@ void mytransform(const ITER1 &b1, const ITER1 &e1 , const ITER2 &b2, const OP& o
   std::vector < ITER1> e1_t(nth);
   std::vector < ITER2> b2_t(nth);
   const size_t l = std::distance(b1,e1);
-  for (int i = 0; i < nth; ++i){
+  for (size_t i = 0; i < nth; ++i){
     b1_t[i] = b1+i*l/nth;
     b2_t[i] = b2+i*l/nth;
     e1_t[i] = b1+(i+1)*l/nth;
   }
   e1_t[nth-1] = e1;
 #pragma omp parallel for
-  for (int i =0; i< nth; ++i)
+  for (size_t i =0; i< nth; ++i)
     std::transform(b1_t[i], e1_t[i],  b2_t[i], op  );
 }
 
 
 
 int main(int argc, char *argv[]){
+  if (argc < 2){
+    std::cerr  << "Usage : " << argv[0] << " meshfilename.msh [numthreads]"<< std::endl;
+    return 1;
+  }
+
+  
+  int numthreads = 4 ;
+  if (argc == 3) numthreads = std::stoi (argv[2]);
+  omp_set_num_threads(numthreads);
+  
   using scal_t = double;
   tensor2_9cm< scal_t> F = {-4.,2.,3.,1,4.,2.,1.,5.,2.};
 
@@ -47,29 +57,27 @@ int main(int argc, char *argv[]){
   law_test(F, lawneo);
   std::cout << "testing lawstvenant" << std::endl;
   law_test(F, lawst);
-  
-  const coordinate<scal_t > X0 = {1.,2.,0.3};
-  const coordinate<scal_t > X1 ={1./3.,0.1,0.2};
-  const coordinate<scal_t > X2 = {0.7,1.,0.2};
-  const coordinate<scal_t > X3 = {0.1,0.3,1.};
-  const coordinate<scal_t > x0 ={0.1,0.25,0.17};
-  const coordinate<scal_t > x1 ={3.,0.15,0.16};
-  const coordinate<scal_t > x2 ={0.37,2.,0.29};
-  const coordinate<scal_t > x3 = {0.42,0.11,2.};
 
-  /*
-  const coordinate<scal_t > X0 = {0., 0., 0.};
-  const coordinate<scal_t > X1 = {1., 0., 0.};
-  const coordinate<scal_t > X2 = {0., 1., 0.};
-  const coordinate<scal_t > X3 = {0,  0., 1.};
-  const coordinate<scal_t > x0 = {0., 0., 0.};
-  const coordinate<scal_t > x1 = {2., 0., 0.};
-  const coordinate<scal_t > x2 = {0., 3., 0.};
-  const coordinate<scal_t > x3 = {0,  0., 4.};
-  */
-  
-  
-  //oneelemtest(X0, X1, X2, X3, x0, x1, x2, x3, lawneo);
+  if(0)
+  {// oneleme test 
+    const coordinate<scal_t > X0 = {1.,2.,0.3};
+    const coordinate<scal_t > X1 ={1./3.,0.1,0.2};
+    const coordinate<scal_t > X2 = {0.7,1.,0.2};
+    const coordinate<scal_t > X3 = {0.1,0.3,1.};
+    const coordinate<scal_t > x0 ={0.1,0.25,0.17};
+    const coordinate<scal_t > x1 ={3.,0.15,0.16};
+    const coordinate<scal_t > x2 ={0.37,2.,0.29};
+    const coordinate<scal_t > x3 = {0.42,0.11,2.};
+    //const coordinate<scal_t > X0 = {0., 0., 0.};
+    //const coordinate<scal_t > X1 = {1., 0., 0.};
+    //const coordinate<scal_t > X2 = {0., 1., 0.};
+    //const coordinate<scal_t > X3 = {0,  0., 1.};
+    //const coordinate<scal_t > x0 = {0., 0., 0.};
+    //const coordinate<scal_t > x1 = {2., 0., 0.};
+    //const coordinate<scal_t > x2 = {0., 3., 0.};
+    //const coordinate<scal_t > x3 = {0,  0., 4.};
+    oneelemtest(X0, X1, X2, X3, x0, x1, x2, x3, lawneo);
+  }
   
   /*tensor2_9cm<double > A = {1.,2.,3.,1,4.,2.,1.,5.,2.};
   std::cout << invert(A) << std::endl;
@@ -81,8 +89,14 @@ int main(int argc, char *argv[]){
   */
 
   //std::fstream inputfilegmsh("cube_20.msh");
-  std::fstream inputfilegmsh("cube_100.msh");
-  //  std::fstream inputfilegmsh("cube_200.msh");
+  //std::fstream inputfilegmsh("cube_100.msh");
+  std::string meshfilename = argv[1];
+  std::fstream inputfilegmsh(meshfilename);
+  if(!inputfilegmsh.is_open() ){
+    std::cerr << "Can't open meshfile " <<  meshfilename << std::endl;
+    return 1;
+  }
+  
   
   
   gmsh_import::mesh m = gmsh_import::import_GMSH(inputfilegmsh);
@@ -92,7 +106,7 @@ int main(int argc, char *argv[]){
   using fem_t = fem< scal_t >;
   fem_t pb;
   pb.coordinates[0].resize(m.nodes.size());
-  for (int i=0; i < m.nodes.size(); ++i){
+  for (size_t i=0; i < m.nodes.size(); ++i){
     pb.coordinates[0][i] = {static_cast< scal_t> (m.nodes[i].x), static_cast< scal_t> ( m.nodes[i].y), static_cast< scal_t> (m.nodes[i].z)};
   }
 
@@ -128,7 +142,7 @@ int main(int argc, char *argv[]){
     pb.vertices[i] = {&classif, i};
   }
   size_t ntets = 0;
-  for (int i=0; i < m.elems.size(); ++i){
+  for (size_t i=0; i < m.elems.size(); ++i){
     if (m.elems[i].type == 4){
       auto tet= m.elems[i];
       int k0= tet.gmshnodeids[0];
@@ -193,7 +207,7 @@ int main(int argc, char *argv[]){
   std::cout << F3 << std::endl;
   */
   
-  omp_set_num_threads(32);
+ 
   auto now = std::chrono::high_resolution_clock::now;
   typedef std::chrono::duration<double, std::milli> dt_t;
   dt_t time_serial;
@@ -500,6 +514,6 @@ int main(int argc, char *argv[]){
   std::cout <<  " my       speed up "<<  " " << time_serial.count()/time_parallel2.count() << std::endl;
    
  
-
+  return 0;
    
 }
