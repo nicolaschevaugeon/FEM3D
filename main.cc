@@ -65,8 +65,9 @@ int main(int argc, char *argv[]){
   */
 
  
-  //    std::fstream inputfilegmsh("cube_100.msh");
-  std::fstream inputfilegmsh("cube_200.msh");
+      std::fstream inputfilegmsh("cube_100.msh");
+  //  std::fstream inputfilegmsh("cube_200.msh");
+  //std::fstream inputfilegmsh("cube_20.msh");
   gmsh_import::mesh m = gmsh_import::import_GMSH(inputfilegmsh);
   std::cout << "Read gmsh mesh, " << "nv =" << m.nodes.size() << "nelem = " << m.elems.size() << std::endl;
   
@@ -175,7 +176,7 @@ int main(int argc, char *argv[]){
   std::cout << F3 << std::endl;
   */
   
-  omp_set_num_threads(8);
+  omp_set_num_threads(32);
   auto now = std::chrono::high_resolution_clock::now;
   typedef std::chrono::duration<double, std::milli> dt_t;
   dt_t time_serial;

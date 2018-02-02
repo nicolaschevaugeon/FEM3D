@@ -65,7 +65,7 @@ template < class Scal >
 class basis : public std::array< Scal , 9>{
 public: 
   basis( const coordinate<Scal > &X0, const coordinate<Scal > &X1, const coordinate<Scal > &X2):
-    std::array<Scal, 9>{ X0[0], X0[1], X0[2], X1[0], X1[1], X1[2], X2[0], X2[1], X2[2]  } {}
+  std::array<Scal, 9>{ {X0[0], X0[1], X0[2], X1[0], X1[1], X1[2], X2[0], X2[1], X2[2]  } } {}
 };
 
 
@@ -82,7 +82,15 @@ public:
   class tetrahedre : public meshentity {
    
   public:
-    tetrahedre (h_classification classif, const  std::array< h_vertex, 4> & _vertices, size_t _id):  meshentity{classif}, vertices{_vertices}, id(_id) {}
+    tetrahedre (h_classification classif, const  std::array< h_vertex, 4> & _vertices, size_t _id):  meshentity{classif}, // the following does not work on g++ 4.8.2 ... vertices{ _vertices },
+id(_id) {
+  //std::copy(_vertices.begin(), _vertices.begin(), vertices.begin() );
+  vertices[0] = _vertices[0];
+  vertices[1] = _vertices[1];
+  vertices[2] = _vertices[2];
+  vertices[3] = _vertices[3];
+
+    }
     std::array< h_vertex, 4> vertices;
     size_t id;
   };
