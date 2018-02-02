@@ -1,6 +1,8 @@
 #ifndef _fem_
 #define _fem_
 
+#include "tensor2_9cm.h"
+
 class classification{
 public :
   size_t dim;
@@ -8,36 +10,6 @@ public :
 };
 using h_classification = classification *;
 
-template <class Scal>
-class coordinate  {
-public :
-  std::array<Scal, 3> data;
-  coordinate & operator  +=( const coordinate &rhs ){
-    data[0] += rhs.data[0];
-    data[1] += rhs.data[1];
-    data[2] += rhs.data[2];
-    return *this;
-  }
-  coordinate & operator  -=( const coordinate &rhs ){
-    data[0] -= rhs.data[0];
-    data[1] -= rhs.data[1];
-    data[2] -= rhs.data[2];
-    return *this;
-  }
-  Scal & operator[](size_t i){return data[i];}
-  const Scal & operator[](size_t i) const {return data[i];}
-  
-};
-
-template <class Scal>
-coordinate<Scal > operator+( const coordinate<Scal> & A, const coordinate<Scal> & B ){
-  return coordinate<Scal >( {std::array<Scal ,3>{A[0]+B[0],A[1]+B[1],A[2]+B[2]}} ) ;
-}
-
-template <class Scal>
-coordinate<Scal> operator-( const coordinate<Scal> & A, const coordinate<Scal> & B ){
-  return{A[0]-B[0],A[1]-B[1],A[2]-B[2]} ;
-}
 
 
 

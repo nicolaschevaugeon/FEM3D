@@ -19,6 +19,10 @@ namespace gmsh_import{
   struct mesh{
     std::vector< node > nodes;
     std::vector< element > elems;
+    void clear(){
+      nodes.clear();
+      elems.clear();
+    }
   };
 
   mesh import_GMSH( std::istream & infile);

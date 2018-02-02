@@ -1,4 +1,3 @@
-
 #include <array>
 #include <vector>
 #include <parallel/algorithm>
@@ -91,51 +90,25 @@ int main(int argc, char *argv[]){
   //std::fstream inputfilegmsh("cube_20.msh");
   //std::fstream inputfilegmsh("cube_100.msh");
   std::string meshfilename = argv[1];
-  std::fstream inputfilegmsh(meshfilename);
+  std::ifstream inputfilegmsh(meshfilename);
   if(!inputfilegmsh.is_open() ){
     std::cerr << "Can't open meshfile " <<  meshfilename << std::endl;
     return 1;
   }
-  
-  
-  
   gmsh_import::mesh m = gmsh_import::import_GMSH(inputfilegmsh);
+  inputfilegmsh.close();
   std::cout << "Read gmsh mesh, " << "nv =" << m.nodes.size() << "nelem = " << m.elems.size() << std::endl;
   
   
   using fem_t = fem< scal_t >;
   fem_t pb;
+
+  // Putting the mesh in fem
   pb.coordinates[0].resize(m.nodes.size());
   for (size_t i=0; i < m.nodes.size(); ++i){
     pb.coordinates[0][i] = {static_cast< scal_t> (m.nodes[i].x), static_cast< scal_t> ( m.nodes[i].y), static_cast< scal_t> (m.nodes[i].z)};
   }
-
-
-  
   pb.coordinates[1] =  pb.coordinates[0];
-  for_each( pb.coordinates[1].begin(), pb.coordinates[1].end(), []( coordinate< scal_t> &in  ){
-      scal_t in0 = in.data[0];
-      scal_t in1 = in.data[1];
-      scal_t in2 = in.data[2];
-      scal_t u0  =2.;
-      scal_t u1  =3.;
-      scal_t u2  =4.;
-      scal_t F00 = 1.3;
-      scal_t F01 = 1.2;
-      scal_t F02 = 2.;
-      scal_t F10 = 0.5;
-      scal_t F11 = 1.01;
-      scal_t F12 = 0.7;
-      scal_t F20 = 0.2;
-      scal_t F21 = 0.6;
-      scal_t F22 = 0.37;
-      scal_t out0 = F00*in0 +F01*in1+ F02*in2 + u0;
-      scal_t out1 = F10*in0 +F11*in1+ F12*in2 + u1;
-      scal_t out2 = F20*in0 +F21*in1+ F22*in2 + u2;
-      in = { out0, out1, out2};
-    }
-
-    );
   pb.vertices.resize(m.nodes.size() );
   classification classif = {3, 10};
   for( size_t i = 0; i < pb.vertices.size(); ++i){
@@ -152,29 +125,20 @@ int main(int argc, char *argv[]){
       pb.tets.push_back( fem_t::tetrahedre {&classif, { &pb.vertices[k0-1],  &pb.vertices[k1-1], &pb.vertices[k2-1], &pb.vertices[k3-1] }, ntets } );
       ++ntets;
     }
-    
   }
+  m.clear(); // I don't need gmsh mesh representation anymore ...
+  
+  // setting deformed nodes coordinates
+   for_each( pb.coordinates[1].begin(), pb.coordinates[1].end(), []( coordinate< scal_t> &X  ){
+       const coordinate<scal_t> u ={2.,3.,4.};
+       const tensor2_9cm< scal_t> F = {1.3, 0.5, 0.2,1.2, 1.01, 0.6, 2., 0.7, 0.37 };
+       X =   F*X +u;
+    }
+
+    );
+  
   std::cout << "NTETS " << ntets;
   std::cout << pb.tets[0] << std::endl;
-
-  /*
-  pb.coordinates[0][0] = {0.,0.,0.};
-  pb.coordinates[0][1] = {1./3.,0.,0.};
-  pb.coordinates[0][2] = {0.,1.,0.};
-  pb.coordinates[0][3] = {0.,0.,1.};
-  
-  pb.coordinates[1].resize(4);
-  pb.coordinates[1][0] = {0.,0.,0.};
-  pb.coordinates[1][1] = {3.,0.,0.};
-  pb.coordinates[1][2] = {0.,2.,0.};
-  pb.coordinates[1][3] = {0.,0.,2.};
-  
-  
-  pb.vertices ={ { &classif , 1}, { &classif , 2}, { &classif , 3 },  { &classif , 0 }  };
-  pb.tets = { {&classif, { &pb.vertices[0],  &pb.vertices[1],  &pb.vertices[2], &pb.vertices[3] } }  };
-  */
-
-  
  
  
  
@@ -182,31 +146,11 @@ int main(int argc, char *argv[]){
   const Hyperelastic< scal_t > & law = lawneo;
   pb.law = &law;
   
-  // int ne = 1 << 26;
   int ne = ntets;
-
-  // pb.tets = std::vector< fem_t::tetrahedre>(ne,  fem_t::tetrahedre{&classif, { &pb.vertices[0],  &pb.vertices[1],  &pb.vertices[2], &pb.vertices[3] } } );
-  
+ 
   __gnu_parallel::_Parallelism par_tag = __gnu_parallel::_Parallelism::parallel_unbalanced; //130
 
   pb.setFops();
-
-  // Forcing instanciation of templates
-  /*
-  fem_t::tensor_t F0={1.,0.,0.,0.,1.,0.,0.,0.,1.};
-  auto PKI0= lawneo.PKI(F0);
-  auto PKI1= lawst.PKI(F0);
-  auto F1 = pb.F(pb.tets[0], 0, 1);
-  std::cout << "F elem1 v1 " << std::endl;
-  std::cout << F1 << std::endl;
-  auto F2 = pb.Fv2(pb.tets[0], 0, 1);
-  std::cout << "F elem1 v2 " << std::endl;
-  std::cout << F2 << std::endl;
-  auto F3 = pb.Fv3(pb.tets[0],  1);
-  std::cout << "F elem1 v3 " << std::endl;
-  std::cout << F3 << std::endl;
-  */
-  
  
   auto now = std::chrono::high_resolution_clock::now;
   typedef std::chrono::duration<double, std::milli> dt_t;
