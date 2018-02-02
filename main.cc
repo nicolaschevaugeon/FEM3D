@@ -478,7 +478,7 @@ int main(int argc, char *argv[]){
       std::cout << Fint[0] << std::endl;
       std::cout << Fint[ne-1] << std::endl;
     }
-  auto time_serial2 = time_serial;
+  auto time_parallel2 = time_serial;
   for (int i = 0; i < 1; ++i)
     {
       std::vector< mat34cm< scal_t > >  Fint(ne);
@@ -489,14 +489,15 @@ int main(int argc, char *argv[]){
 	);
       
       auto t_end = now();
-      time_serial2 = t_end-t_start;
+      time_parallel2 = t_end-t_start;
       std::cout << Fint[0] << std::endl;
       std::cout << Fint[ne-1] << std::endl;
     }
   std::cout <<  " parallel transform (base law ) "<< omp_get_max_threads() << " " << time_parallel.count() << std::endl;
   std::cout <<  " serial   transform (base law ) "<< 1  << " " << time_serial.count() << std::endl;
-  std::cout <<  " serial   mytransform (base law ) "<< 1  << " " << time_serial2.count() << std::endl;
+  std::cout <<  " parallel   mytransform (base law ) "<< 1  << " " << time_parallel2.count() << std::endl;
   std::cout <<  " serial   speed up "<<  " " << time_serial.count()/time_parallel.count() << std::endl;
+  std::cout <<  " my       speed up "<<  " " << time_serial.count()/time_parallel2.count() << std::endl;
    
  
 
