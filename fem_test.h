@@ -61,7 +61,7 @@ template <class Scal, class Law >
   std::cout << " op " << op  << std::endl; 
   _fint  = apply(op, P);
   std::cout << " fint op  " << _fint << std::endl;
-  mat34cm<Scal >dx00 = {0.,-1.,0., 0.,0.,0., 0.,0.,0., 0.,0.,0.};
+  //mat34cm<Scal >dx00 = {0.,-1.,0., 0.,0.,0., 0.,0.,0., 0.,0.,0.};
   
   
  

@@ -65,7 +65,7 @@ public:
 
 template <class Scal, class Law > void law_test( const tensor2_9cm<Scal > &F, const Law & law ){
   const tensor2_9cm<Scal > P = law.PKI(F);
-  const Scal psi = law.elastic_potential(F);
+  //const Scal psi = law.elastic_potential(F);
   //std::cout << "psi "<< psi << std::endl;
   // throw;
   tensor2_9cm<Scal > numP;
