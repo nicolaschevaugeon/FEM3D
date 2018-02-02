@@ -16,7 +16,23 @@
 #include "fem_test.h"
 
 
-
+template < class ITER1, class ITER2, class OP>
+void mytransform(const ITER1 &b1, const ITER1 &e1 , const ITER2 &b2, const OP& op){
+  size_t nth = omp_get_max_threads();
+  std::vector < ITER1> b1_t(nth);
+  std::vector < ITER1> e1_t(nth);
+  std::vector < ITER2> b2_t(nth);
+  const size_t l = std::distance(b1,e1);
+  for (int i = 0; i < nth; ++i){
+    b1_t[i] = b1+i*l/nth;
+    b2_t[i] = b2+i*l/nth;
+    e1_t[i] = b1+(i+1)*l/nth;
+  }
+  e1_t[nth-1] = e1;
+#pragma omp parallel for
+  for (int i =0; i< nth; ++i)
+    std::transform(b1_t[i], e1_t[i],  b2_t[i], op  );
+}
 
 
 
@@ -65,8 +81,8 @@ int main(int argc, char *argv[]){
   */
 
  
-  //    std::fstream inputfilegmsh("cube_100.msh");
-  std::fstream inputfilegmsh("cube_200.msh");
+  std::fstream inputfilegmsh("cube_100.msh");
+  //std::fstream inputfilegmsh("cube_200.msh");
   gmsh_import::mesh m = gmsh_import::import_GMSH(inputfilegmsh);
   std::cout << "Read gmsh mesh, " << "nv =" << m.nodes.size() << "nelem = " << m.elems.size() << std::endl;
   
@@ -442,8 +458,8 @@ int main(int argc, char *argv[]){
 	   par_tag);
 	 auto t_end = now();
 	 time_parallel = t_end-t_start;
-	 //std::cout << Fint[0] << std::endl;
-	 //std::cout << Fint[ne-1] << std::endl;
+	 std::cout << Fint[0] << std::endl;
+	 std::cout << Fint[ne-1] << std::endl;
        }
   
   for (int i = 0; i < 1; ++i)
@@ -460,8 +476,24 @@ int main(int argc, char *argv[]){
       std::cout << Fint[0] << std::endl;
       std::cout << Fint[ne-1] << std::endl;
     }
+  auto time_serial2 = time_serial;
+  for (int i = 0; i < 1; ++i)
+    {
+      std::vector< mat34cm< scal_t > >  Fint(ne);
+      auto t_start = now();
+      mytransform(pb.tets.begin(), pb.tets.end(), Fint.begin(),  [&pb](const fem_t::tetrahedre & tet ){
+	  return pb.internal_forces( tet, 1);
+	}
+	);
+      
+      auto t_end = now();
+      time_serial2 = t_end-t_start;
+      std::cout << Fint[0] << std::endl;
+      std::cout << Fint[ne-1] << std::endl;
+    }
   std::cout <<  " parallel transform (base law ) "<< omp_get_max_threads() << " " << time_parallel.count() << std::endl;
   std::cout <<  " serial   transform (base law ) "<< 1  << " " << time_serial.count() << std::endl;
+  std::cout <<  " serial   mytransform (base law ) "<< 1  << " " << time_serial2.count() << std::endl;
   std::cout <<  " serial   speed up "<<  " " << time_serial.count()/time_parallel.count() << std::endl;
    
  
