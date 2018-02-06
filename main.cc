@@ -57,27 +57,7 @@ int main(int argc, char *argv[]){
   std::cout << "testing lawstvenant" << std::endl;
   law_test(F, lawst);
 
-  if(0)
-  {// oneleme test 
-    const coordinate<scal_t > X0 = {1.,2.,0.3};
-    const coordinate<scal_t > X1 ={1./3.,0.1,0.2};
-    const coordinate<scal_t > X2 = {0.7,1.,0.2};
-    const coordinate<scal_t > X3 = {0.1,0.3,1.};
-    const coordinate<scal_t > x0 ={0.1,0.25,0.17};
-    const coordinate<scal_t > x1 ={3.,0.15,0.16};
-    const coordinate<scal_t > x2 ={0.37,2.,0.29};
-    const coordinate<scal_t > x3 = {0.42,0.11,2.};
-    //const coordinate<scal_t > X0 = {0., 0., 0.};
-    //const coordinate<scal_t > X1 = {1., 0., 0.};
-    //const coordinate<scal_t > X2 = {0., 1., 0.};
-    //const coordinate<scal_t > X3 = {0,  0., 1.};
-    //const coordinate<scal_t > x0 = {0., 0., 0.};
-    //const coordinate<scal_t > x1 = {2., 0., 0.};
-    //const coordinate<scal_t > x2 = {0., 3., 0.};
-    //const coordinate<scal_t > x3 = {0,  0., 4.};
-    oneelemtest(X0, X1, X2, X3, x0, x1, x2, x3, lawneo);
-  }
-  
+ 
   /*tensor2_9cm<double > A = {1.,2.,3.,1,4.,2.,1.,5.,2.};
   std::cout << invert(A) << std::endl;
   std::cout << invert(A)*A << std::endl;

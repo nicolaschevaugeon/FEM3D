@@ -1,7 +1,9 @@
 #ifndef _fem_
 #define _fem_
 
+#include <vector>
 #include "tensor2_9cm.h"
+#include "hyperelastic.h"
 
 class classification{
 public :

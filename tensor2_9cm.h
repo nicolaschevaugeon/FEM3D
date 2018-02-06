@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <iostream>
+#include <math.h>
 
 template <class Scal>
 class coordinate  {

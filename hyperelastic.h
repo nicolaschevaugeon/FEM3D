@@ -1,7 +1,12 @@
 #ifndef  _hyperelastic_
 #define  _hyperelastic_
-#include "tensor2_9cm.h"
+
 #include <iostream>
+
+#include "tensor2_9cm.h"
+#include "math.h"
+
+
 
 template < class Scal >
 class Hyperelastic{

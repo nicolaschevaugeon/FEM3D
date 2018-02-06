@@ -1,8 +1,4 @@
-#ifndef _fem_test_
-#define _fem_test_
-
 #include "fem.h"
-
 
 
 template <class Scal, class Law >
@@ -91,5 +87,28 @@ template <class Scal, class Law >
 }
 
 
-
-#endif
+int main()
+  {// oneleme test
+    using scal_t = double;
+    const coordinate<scal_t > X0 = {1.,2.,0.3};
+    const coordinate<scal_t > X1 ={1./3.,0.1,0.2};
+    const coordinate<scal_t > X2 = {0.7,1.,0.2};
+    const coordinate<scal_t > X3 = {0.1,0.3,1.};
+    const coordinate<scal_t > x0 ={0.1,0.25,0.17};
+    const coordinate<scal_t > x1 ={3.,0.15,0.16};
+    const coordinate<scal_t > x2 ={0.37,2.,0.29};
+    const coordinate<scal_t > x3 = {0.42,0.11,2.};
+    //const coordinate<scal_t > X0 = {0., 0., 0.};
+    //const coordinate<scal_t > X1 = {1., 0., 0.};
+    //const coordinate<scal_t > X2 = {0., 1., 0.};
+    //const coordinate<scal_t > X3 = {0,  0., 1.};
+    //const coordinate<scal_t > x0 = {0., 0., 0.};
+    //const coordinate<scal_t > x1 = {2., 0., 0.};
+    //const coordinate<scal_t > x2 = {0., 3., 0.};
+    //const coordinate<scal_t > x3 = {0,  0., 4.};
+    Hyperelastic_StVenantKirchhoff < scal_t > lawst = {1.d,2.d};
+    Hyperelastic_NeoHookeen < scal_t > lawneo = {1.d,2.d};
+    oneelemtest(X0, X1, X2, X3, x0, x1, x2, x3, lawneo);
+    oneelemtest(X0, X1, X2, X3, x0, x1, x2, x3, lawst);
+  }
+  
