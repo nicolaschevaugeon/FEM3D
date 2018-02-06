@@ -12,7 +12,8 @@
 #include "gmsh_import.h"
 #include "hyperelastic.h"
 #include "fem.h"
-
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
 
 template < class ITER1, class ITER2, class OP>
 void mytransform(const ITER1 &b1, const ITER1 &e1 , const ITER2 &b2, const OP& op){
@@ -34,8 +35,9 @@ void mytransform(const ITER1 &b1, const ITER1 &e1 , const ITER2 &b2, const OP& o
 
 
 
+
 int main(int argc, char *argv[]){
-  using scal_t =double;
+  using scal_t = double;
   if (argc < 2){
     std::cerr  << "Usage : " << argv[0] << " meshfilename.msh [numthreads]"<< std::endl;
     return 1;
@@ -46,18 +48,6 @@ int main(int argc, char *argv[]){
   if (argc == 3) numthreads = std::stoi (argv[2]);
   omp_set_num_threads(numthreads);
  
- 
-  /*tensor2_9cm<double > A = {1.,2.,3.,1,4.,2.,1.,5.,2.};
-  std::cout << invert(A) << std::endl;
-  std::cout << invert(A)*A << std::endl;
-  std::cout << A << std::endl;
-  std::cout << transpose(A) << std::endl;
-  std::cout << transpose(A)*transpose(invert(A)) << std::endl;
-  std::cout << invert_transpose(A)*transpose(A) << std::endl;
-  */
-
-  //std::fstream inputfilegmsh("cube_20.msh");
-  //std::fstream inputfilegmsh("cube_100.msh");
   std::string meshfilename = argv[1];
   std::ifstream inputfilegmsh(meshfilename);
   if(!inputfilegmsh.is_open() ){
@@ -67,7 +57,7 @@ int main(int argc, char *argv[]){
   gmsh_import::mesh m = gmsh_import::import_GMSH(inputfilegmsh);
   inputfilegmsh.close();
   std::cout << "Read gmsh mesh, " << "nv =" << m.nodes.size() << "nelem = " << m.elems.size() << std::endl;
-  
+ 
   
   using fem_t = fem< scal_t >;
   fem_t pb;
@@ -81,7 +71,7 @@ int main(int argc, char *argv[]){
   pb.vertices.resize(m.nodes.size() );
   classification classif = {3, 10};
   for( size_t i = 0; i < pb.vertices.size(); ++i){
-    pb.vertices[i] = {&classif, i};
+    pb.vertices[i] = {&classif, i, i+1};
   }
   size_t ntets = 0;
   for (size_t i=0; i < m.elems.size(); ++i){
@@ -98,14 +88,22 @@ int main(int argc, char *argv[]){
   m.clear(); // I don't need gmsh mesh representation anymore ...
   
   // setting deformed configuration  nodes coordinates
-   for_each( pb.coordinates[1].begin(), pb.coordinates[1].end(), []( coordinate< scal_t> &X  ){
-       const coordinate<scal_t> u ={2.,3.,4.};
-       const tensor2_9cm< scal_t> F = {1.3, 0.5, 0.2,1.2, 1.01, 0.6, 2., 0.7, 0.37 };
-       X =   F*X +u;
-    }
-
+  for_each( pb.coordinates[1].begin(), pb.coordinates[1].end(), []( coordinate< scal_t> &X  ){
+      const coordinate<scal_t> u ={2.,3.,4.};
+      const tensor2_9cm< scal_t> F = {1.3, 0.5, 0.2,1.2, 1.01, 0.6, 2., 0.7, 0.37 };
+      X =   F*X +u;
+     }
+    
     );
   
+  fs::copy_file(meshfilename, "result.msh", fs::copy_options::overwrite_existing );
+  append_vector_view_gmsh( "result.msh", "displacement", 0.,0, [&pb] (const vertex &v) {  const auto  u = pb.coordinates[1][v.index] -pb.coordinates[0][v.index];         return std::array<float, 3>{ (float)u.data[0], (float)u.data[1], (float)u.data[2]};
+    },
+    [&pb] (const vertex &v) { return v.base_mesh_id;},
+    pb.vertices.begin(), pb.vertices.end()
+    );
+  
+   
   std::cout << "NTETS " << ntets;
   std::cout << pb.tets[0] << std::endl;
  

@@ -1,9 +1,11 @@
 CXX = g++
 CXXFLAGS = -Wall -g -O3 -fopenmp --std=c++11 
-all : main test_omp test_one_elem test_law test_tensor
+all : main main_dynamic_explicit test_omp test_one_elem test_law test_tensor
 main : main.cc gmsh_import.cc hyperelastic.h fem.h tensor2_9cm.h gmsh_import.h Makefile
-	$(CXX) $(CXXFLAGS) main.cc gmsh_import.cc -o main
+	$(CXX) $(CXXFLAGS) main.cc gmsh_import.cc -lstdc++fs -o main
 
+main_dynamic_explicit : main_dynamic_explicit.cc gmsh_import.cc hyperelastic.h fem.h tensor2_9cm.h gmsh_import.h Makefile
+	$(CXX) $(CXXFLAGS) main_dynamic_explicit.cc gmsh_import.cc -lstdc++fs -o main_dynamic_explicit
 test_omp : test_omp.cc
 	$(CXX) $(CXXFLAGS) test_omp.cc -o test_omp
 

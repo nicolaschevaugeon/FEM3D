@@ -20,7 +20,7 @@ template <class Scal, class Law >
   pb.coordinates[1][2] = x2;
   pb.coordinates[1][3] = x3;
 
-  pb.vertices ={ { &classif , 1}, { &classif , 2}, { &classif , 3 },  { &classif , 0 }  };
+  pb.vertices ={ { &classif , 1, 2}, { &classif , 2, 3}, { &classif , 3, 4 },  { &classif , 0, 1 }  };
   pb.tets = { {&classif, { &pb.vertices[0],  &pb.vertices[1],  &pb.vertices[2], &pb.vertices[3] } , 0 }  };
   
   auto F = pb.F(pb.tets[0], 0, 1);

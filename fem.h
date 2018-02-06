@@ -27,8 +27,9 @@ public :
 class vertex : public meshentity {
 public:
   vertex()  =default;
-  vertex( h_classification classif, size_t _index ): meshentity{classif}, index{_index}{} 
+ vertex( h_classification classif, size_t _index, size_t _base_mesh_id ): meshentity{classif}, index{_index}, base_mesh_id(_base_mesh_id){} 
   size_t index;
+  size_t base_mesh_id;
 };
 
 
@@ -42,6 +43,27 @@ public:
   std::array<Scal, 9>{ {X0[0], X0[1], X0[2], X1[0], X1[1], X1[2], X2[0], X2[1], X2[2]  } } {}
 };
 
+/*
+
+field{
+  space;
+  map <entity, coefficients>;
+}
+
+vector3d_field_coefficient{
+std::array<int, 3>     indexes_in_equation_array;
+std::array< size_t, 3> indexes_in_unknown array;
+unordered_map <dof_id, std::pair< entity *, dir > >
+}
+*/
+
+/*
+class vector3d_field_coefficient{
+  enum type {free, fixed}
+  size_t number;
+  std::unordered_map
+ 
+  }*/
 
 //tensor2_9cm<double > 
 

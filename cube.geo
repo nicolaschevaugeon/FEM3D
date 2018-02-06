@@ -8,9 +8,10 @@ L3 = 2;
 
 h = 2; 
 
-nbelt_x = 200;
-nbelt_y = 200;
-nbelt_z = 200;
+ne = 2;
+nbelt_x = ne;
+nbelt_y = ne;
+nbelt_z = ne;
 
 
 nbpt_x = nbelt_x + 1;
