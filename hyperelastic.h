@@ -67,12 +67,9 @@ public:
   const Scal lambda, mu;
 };
 
-
-template <class Scal, class Law > void law_test( const tensor2_9cm<Scal > &F, const Law & law ){
+// return true if test  failed
+template <class Scal, class Law > bool law_test( const tensor2_9cm<Scal > &F, const Law & law ){
   const tensor2_9cm<Scal > P = law.PKI(F);
-  //const Scal psi = law.elastic_potential(F);
-  //std::cout << "psi "<< psi << std::endl;
-  // throw;
   tensor2_9cm<Scal > numP;
   const Scal eps = 0.01;
   for (int i = 0; i< 9; ++i){
@@ -88,8 +85,9 @@ template <class Scal, class Law > void law_test( const tensor2_9cm<Scal > &F, co
     std::cout << "P    " << P   << std::endl;
     std::cout << "dfP  " << numP << std::endl;
     std::cout << norm2(P-numP)*norm2(numP) << " "<<  eps*norm2(numP) << std::endl;
-    throw;
+    return true;
   }
+  return false;
 }
 
 #endif

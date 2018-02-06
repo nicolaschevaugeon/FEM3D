@@ -12,7 +12,6 @@
 #include "gmsh_import.h"
 #include "hyperelastic.h"
 #include "fem.h"
-#include "fem_test.h"
 
 
 template < class ITER1, class ITER2, class OP>
@@ -36,6 +35,7 @@ void mytransform(const ITER1 &b1, const ITER1 &e1 , const ITER2 &b2, const OP& o
 
 
 int main(int argc, char *argv[]){
+  using scal_t =double;
   if (argc < 2){
     std::cerr  << "Usage : " << argv[0] << " meshfilename.msh [numthreads]"<< std::endl;
     return 1;
@@ -45,18 +45,7 @@ int main(int argc, char *argv[]){
   int numthreads = 4 ;
   if (argc == 3) numthreads = std::stoi (argv[2]);
   omp_set_num_threads(numthreads);
-  
-  using scal_t = double;
-  tensor2_9cm< scal_t> F = {-4.,2.,3.,1,4.,2.,1.,5.,2.};
-
-  Hyperelastic_StVenantKirchhoff < scal_t > lawst = {1.d,2.d};
-  Hyperelastic_NeoHookeen < scal_t > lawneo = {1.d,2.d};
-  
-  std::cout << "testing lawneo" << std::endl;
-  law_test(F, lawneo);
-  std::cout << "testing lawstvenant" << std::endl;
-  law_test(F, lawst);
-
+ 
  
   /*tensor2_9cm<double > A = {1.,2.,3.,1,4.,2.,1.,5.,2.};
   std::cout << invert(A) << std::endl;
@@ -108,7 +97,7 @@ int main(int argc, char *argv[]){
   }
   m.clear(); // I don't need gmsh mesh representation anymore ...
   
-  // setting deformed nodes coordinates
+  // setting deformed configuration  nodes coordinates
    for_each( pb.coordinates[1].begin(), pb.coordinates[1].end(), []( coordinate< scal_t> &X  ){
        const coordinate<scal_t> u ={2.,3.,4.};
        const tensor2_9cm< scal_t> F = {1.3, 0.5, 0.2,1.2, 1.01, 0.6, 2., 0.7, 0.37 };
@@ -120,7 +109,9 @@ int main(int argc, char *argv[]){
   std::cout << "NTETS " << ntets;
   std::cout << pb.tets[0] << std::endl;
  
- 
+  //Hyperelastic_StVenantKirchhoff < scal_t > lawst = {1.d,2.d};
+  Hyperelastic_NeoHookeen < scal_t > lawneo = {1.d,2.d};
+  
  
 
   const Hyperelastic< scal_t > & law = lawneo;
