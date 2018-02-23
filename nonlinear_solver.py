@@ -27,9 +27,30 @@ class newton :
 
 #taken from broyden 1965        
 class broyden:
-    def __init__(self, r, drdx):
+    def __init__(self, r):
         self.r = r
-
+    def solve(self, x0, drdx0):
+        k=0;
+        xp = x0
+        res = self.r(xp)
+        drdx = drdx0
+        si = 0.01
+        pi = -la.solve(drdx,res)
+        xp = xp +pi
+        res = self.r(xp)
+        while ( (la.norm(res) > 1.e-6) & (k < 100)):
+            xps = xp+(1.-si)*pi
+            y = res-self.r(xps)
+            drdx =drdx + np.outer(y-si*drdx.dot(pi), pi)/si*pi.dot(pi)
+            pi = -la.solve(drdx,res)
+            xp = xp +pi
+            res = self.r(xp)
+            k = k+1
+            print(" k = ",k , " res = ", np.abs(res), "x = ", xp)
+        if (la.norm (res) > 1.e-6) :
+            print("not converged k = ",k , " res = ", la.norm(res)) 
+        return xp
+            
 
 class fixed_point :
     def __init__(self, r):

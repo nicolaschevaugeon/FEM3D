@@ -30,4 +30,9 @@ def drdx1(x) :
     return np.array( [[ 1.+2*x[0], 2*x[1] ], [2*x[0] , 1+2*x[1] ]])
     
 solver = nonlinear_solver.newton( r1, drdx1) 
-solver.solve( np.array([0.,0.]))
+x0 = np.array([0.,0.])
+solver.solve( x0 )
+
+solver = nonlinear_solver.broyden(r1)
+
+solver.solve(x0, drdx1(x0) )
