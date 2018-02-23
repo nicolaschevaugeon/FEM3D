@@ -57,8 +57,8 @@ for integ in integ_list:
     ttab.append(t0)
    
     t = t0
-    x = x0
-    v = v0
+    x = np.array([x0])
+    v = np.array([v0])
     for i in range(N):
       [x,v] = integ(x,  v, dt, 1, gfun)
       t =t +dt;

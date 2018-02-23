@@ -6,9 +6,9 @@ Created on Tue Feb 20 09:42:19 2018
 @author: chevaugeon
 """
 
-import math
+#import math
 import numpy as np
-import numpy.linalg as la
+#import numpy.linalg as la
 import matplotlib.pyplot as plt
 import law
 
@@ -57,37 +57,39 @@ if dynamic :
     ifig
     mat.clear()
    
-    x0 = 0.;
-    v0 = 0.;
+    x0 = np.array([0.]);
+    v0 = np.array([0.]);
     t0 = 0.;
-    f0 = 1.4;
+   
+    f0 = 1.2;
     ramp = 2*np.pi*25.12;
     def fe(t) :
-         #return min (f0, f0*t/ramp)
-         return f0*np.sin(t/25.12)
-         return f0
+        f =  min (f0, f0*t/ramp)
+        f =  f0*np.sin(t/25.12)
+        #f = f0
+        return np.array([f])
      
     def afun (x,t):
-        eps = x/L;
+        eps = x[0]/L;
         sig = mat.stress(eps)
-        return fe(t)-sig*S/masse
+        return fe(t)-np.array([sig*S/masse])
     
     def dadxfun(x,t):
-        eps = x/L;
+        eps = x[0]/L;
         dsig = mat.dstressdeps(eps)
-        return -dsig*S/masse/L
+        return np.array([[-dsig*S/masse/L]])
         
    
    
     sig0 = mat.stress(x0/L)
     stored_energie0 = mat.stored_energie()*S*L
-    Ec0  = 0.5*v0*v0*masse;
+    Ec0  = 0.5*np.dot(v0,v0)*masse;
     a0 = afun(x0, t0);
     fe0 = fe(t0);
     W0 = 0.;
     #dt = 0.25;
    
-    Nstep =2.;
+    Nstep =20;
     period = 2*np.pi;
     dt = period/(Nstep)
     N=int(np.floor(Nstep*50));
@@ -116,6 +118,8 @@ if dynamic :
     gamma = 0.5
     beta = 1./4.
     integ = time_integrator.newmark(afun, dadxfun, gamma, beta)
+ #   integ = time_integrator.verlet(afun)
+    
     ttab = [];
     xtab = [];
     vtab = [];
@@ -149,7 +153,14 @@ if dynamic :
     W = W0
     for i in range(N):
  #     print (i+1)
+     # print (x)
+     # print (v)
+     # print(a)
       [x,v,a] = integ.step(x,  v, a, t, dt) #, dadxfun)
+     # print (x)
+     # print (v)
+     # print(a)
+     # break
       t =t +dt;
       ttab.append(t);
       xtab.append(x);
@@ -161,9 +172,9 @@ if dynamic :
       dissipated_energietab.append(Edp+mat.dissipated_increment()) 
       Wep= Wetab.pop()
       Wetab.append(Wep)
-      Wetab.append(Wep+dt*v*fe(t))
+      Wetab.append(Wep+dt*np.dot(v,fe(t)))
       mat.update();
-      Ectab.append(0.5*v*v*masse)
+      Ectab.append(0.5*np.dot(v,v)*masse)
       fetab.append(fe(t));
    # print(xtab)  
     #Ep = 0.5*alpha*np.array(xtab)*np.array(xtab)
